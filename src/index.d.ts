@@ -29,6 +29,8 @@ export interface GeniffyMiddlewareOptions extends GeniffyOptions {
  */
 export declare function geniffyMiddleware(options: GeniffyMiddlewareOptions): LanguageModelMiddleware;
 
+/** This package's version, sent with every call so the Requests page shows which integration made it. */
+export declare const VERSION: string;
 /** The model, wrapped with geniffyMiddleware: `streamText({ model: withGeniffy(model, { space }) })`. */
 export declare function withGeniffy(model: LanguageModel, options: GeniffyMiddlewareOptions): LanguageModel;
 

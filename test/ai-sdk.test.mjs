@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { generateText, stepCountIs, streamText, tool, jsonSchema } from "ai";
 import { MockLanguageModelV4, convertArrayToReadableStream } from "ai/test";
-import { geniffyTools, lastUserText, withGeniffy } from "../src/index.js";
+import { geniffyTools, lastUserText, VERSION, withGeniffy } from "../src/index.js";
 
 const usage = {
   inputTokens: { total: 10, noCache: 10, cacheRead: 0, cacheWrite: 0 },
@@ -154,4 +154,10 @@ test("a model wrapped once for a whole app keeps only recent lookups", async () 
   await generateText({ model: wrapped, prompt: "Question number 299?" });
   await generateText({ model: wrapped, prompt: "Question number 0?" });
   assert.equal(calls.context.length, 301, "the newest question is still held; the oldest was let go and asked again");
+});
+
+test("the client it makes names this package, at the version package.json says", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf-8"));
+  assert.equal(VERSION, pkg.version);
 });

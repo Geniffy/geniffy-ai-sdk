@@ -10,6 +10,10 @@
 import { jsonSchema, tool, wrapLanguageModel } from "ai";
 import { Geniffy } from "geniffy";
 
+// This package's own name and version, sent after the SDK's so the Requests page in the Geniffy app shows which
+// integration made each call (a geniffy before 0.2.0 leaves it out). Kept equal to package.json by a test.
+export const VERSION = "0.1.0";
+
 const DEFAULT_INSTRUCTIONS =
   "What follows is this user's memory: what they told this app before, each line with where it came from. " +
   "Use it when it helps and don't recite it. If it doesn't cover something, say so instead of guessing.";
@@ -33,7 +37,8 @@ function spaceName(space) {
 function memoryFor(options) {
   if (!options || !("space" in options)) throw new TypeError(NO_SPACE);
   const space = options.space === null ? null : spaceName(options.space);
-  const client = options.client ?? new Geniffy(options.apiKey ? { apiKey: options.apiKey } : undefined);
+  const client = options.client ??
+    new Geniffy({ ...(options.apiKey ? { apiKey: options.apiKey } : {}), integration: `geniffy-ai-sdk/${VERSION}` });
   return space === null ? client : client.space(space);
 }
 
