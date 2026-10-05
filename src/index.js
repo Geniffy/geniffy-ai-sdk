@@ -44,18 +44,24 @@ export function geniffyMiddleware(options) {
   const remember = options.remember !== false;
   const instructions = options.instructions ?? DEFAULT_INSTRUCTIONS;
   const onError = options.onError ?? ((error) => console.warn(`[geniffy] ${error?.message || error}`));
-  // A run with tools calls the model once per step, with the same question: ask Geniffy once.
+  // A run with tools calls the model once per step, with the same question: ask Geniffy once. Kept for a few
+  // seconds and a few hundred questions, so a model wrapped once for a whole app neither grows nor goes stale.
   const contexts = new Map();
+  const KEEP_MS = 30_000;
+  const MOST = 256;
 
   const contextFor = (question) => {
-    if (!contexts.has(question)) {
-      contexts.set(question, Promise.resolve(mem.context(question)).catch((error) => {
-        contexts.delete(question);
-        onError(error);
-        return null;
-      }));
-    }
-    return contexts.get(question);
+    const held = contexts.get(question);
+    if (held && Date.now() - held.at < KEEP_MS) return held.context;
+    contexts.delete(question);
+    const context = Promise.resolve(mem.context(question)).catch((error) => {
+      contexts.delete(question);
+      onError(error);
+      return null;
+    });
+    contexts.set(question, { at: Date.now(), context });
+    while (contexts.size > MOST) contexts.delete(contexts.keys().next().value);
+    return context;
   };
 
   // Saved once per exchange, when the model gives its final answer (not on a step that only called tools).

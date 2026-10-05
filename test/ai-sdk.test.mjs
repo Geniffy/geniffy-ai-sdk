@@ -130,3 +130,13 @@ test("the question is the last thing the user said, as the AI SDK hands it over"
                "Second");
   assert.equal(lastUserText([]), "");
 });
+
+test("a model wrapped once for a whole app keeps only recent lookups", async () => {
+  const { calls, client } = standIn();
+  const model = new MockLanguageModelV4({ doGenerate: () => generated("Ok.") });
+  const wrapped = withGeniffy(model, { space: "u", client, remember: false });
+  for (let i = 0; i < 300; i++) await generateText({ model: wrapped, prompt: `Question number ${i}?` });
+  await generateText({ model: wrapped, prompt: "Question number 299?" });
+  await generateText({ model: wrapped, prompt: "Question number 0?" });
+  assert.equal(calls.context.length, 301, "the newest question is still held; the oldest was let go and asked again");
+});
