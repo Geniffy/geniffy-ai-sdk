@@ -1,0 +1,55 @@
+{
+  "name": "geniffy-ai-sdk",
+  "version": "0.1.0",
+  "description": "Geniffy for the Vercel AI SDK: a memory of each of your users, for any model. Wrap a model, or give it recall and remember tools.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "keywords": [
+    "ai",
+    "ai-sdk",
+    "vercel",
+    "memory",
+    "middleware",
+    "tools",
+    "geniffy"
+  ],
+  "homepage": "https://docs.geniffy.com/integrations/vercel-ai-sdk",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Geniffy/geniffy-ai-sdk.git"
+  },
+  "bugs": "https://github.com/Geniffy/geniffy-ai-sdk/issues",
+  "author": "Geniffy <ops@geniffy.com>",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "geniffy": "^0.1.1"
+  },
+  "peerDependencies": {
+    "ai": ">=7"
+  },
+  "devDependencies": {
+    "@ai-sdk/anthropic": "^4.0.71",
+    "ai": "7.0.127",
+    "typescript": "^7.0.2"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check": "tsc -p test/tsconfig.json"
+  }
+}
