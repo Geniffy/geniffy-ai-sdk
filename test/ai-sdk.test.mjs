@@ -32,6 +32,21 @@ test("a space is required: an app's users never land in its owner's memory by ac
   assert.throws(() => geniffyTools(), /needs a space/);
 });
 
+test("a blank or undefined space throws: a user with no id never lands in your own memory", () => {
+  const { client, calls } = standIn();
+  for (const blank of ["", "   "]) {
+    assert.throws(() => withGeniffy(new MockLanguageModelV4(), { space: blank, client }), { name: "TypeError", message: /blank/ });
+    assert.throws(() => geniffyTools({ space: blank, client }), { name: "TypeError", message: /blank/ });
+  }
+  const user = {};
+  assert.throws(() => withGeniffy(new MockLanguageModelV4(), { space: user.id, client }), { name: "TypeError", message: /undefined/ });
+  assert.throws(() => geniffyTools({ space: true, client }), { name: "TypeError", message: /a boolean/ });
+  assert.deepEqual(calls.spaces, [], "no space was opened");
+
+  withGeniffy(new MockLanguageModelV4(), { space: 1042, client });
+  assert.deepEqual(calls.spaces, ["1042"], "an integer id is the same user as its digits");
+});
+
 test("generateText: the model is given what is known, after the app's own instructions, and the exchange is saved", async () => {
   const { calls, client } = standIn();
   const model = new MockLanguageModelV4({ doGenerate: generated("Sending it on WhatsApp.") });

@@ -14,14 +14,27 @@ const DEFAULT_INSTRUCTIONS =
   "What follows is this user's memory: what they told this app before, each line with where it came from. " +
   "Use it when it helps and don't recite it. If it doesn't cover something, say so instead of guessing.";
 
-function memoryFor(options) {
-  if (!options || !("space" in options)) {
-    throw new TypeError(
-      "Geniffy needs a space: the user this is for, such as { space: `user_${user.id}` }. " +
-        "Pass { space: null } only for your own memory, never for your users' data.");
+const NO_SPACE =
+  "Geniffy needs a space: the user this is for, such as { space: `user_${user.id}` }. " +
+  "Pass { space: null } only for your own memory, never for your users' data.";
+
+// The user a space names: a string, or an integer id. Blank and undefined are refused rather than read as
+// your own memory, since each is what a missing user id looks like, and that user would land in it.
+function spaceName(space) {
+  if (typeof space === "number" && Number.isSafeInteger(space)) return String(space);
+  if (typeof space !== "string") {
+    throw new TypeError(`Geniffy's space is ${space === undefined ? "undefined" : `a ${typeof space}`}, not ` +
+      `the user this is for. ${NO_SPACE}`);
   }
+  if (!space.trim()) throw new TypeError(`Geniffy's space is blank: it would be your own memory. ${NO_SPACE}`);
+  return space;
+}
+
+function memoryFor(options) {
+  if (!options || !("space" in options)) throw new TypeError(NO_SPACE);
+  const space = options.space === null ? null : spaceName(options.space);
   const client = options.client ?? new Geniffy(options.apiKey ? { apiKey: options.apiKey } : undefined);
-  return options.space === null ? client : client.space(options.space);
+  return space === null ? client : client.space(space);
 }
 
 const textOf = (content) =>

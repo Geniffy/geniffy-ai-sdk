@@ -64,7 +64,8 @@ const result = await generateText({
 ## One space per user
 
 `space` is required: the user this is for, such as `` `user_${user.id}` ``. Each space is a memory of its own,
-and nothing else can read it. Pass `space: null` only for your own memory, never for your users' data. When a user
+and nothing else can read it. Pass `space: null` only for your own memory, never for your users' data. A blank or
+undefined space throws, so a user with no id never lands in your own memory. When a user
 deletes their account, forget them with `new Geniffy().forgetSpace(...)` from the
 [geniffy](https://www.npmjs.com/package/geniffy) SDK.
 

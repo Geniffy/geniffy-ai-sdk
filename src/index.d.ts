@@ -4,9 +4,10 @@ import type { Geniffy } from "geniffy";
 export interface GeniffyOptions {
   /**
    * Which of your users this is for: one space per user, such as `user_${user.id}`. Required, so that one
-   * user's memory is never written to another's. `null` means your own memory, never your users' data.
+   * user's memory is never written to another's. `null` means your own memory, never your users' data; a
+   * blank space, or undefined, throws.
    */
-  space: string | null;
+  space: string | number | null;
   /** A Geniffy client to use. By default one is made that reads GENIFFY_API_KEY. */
   client?: Geniffy;
   /** A Geniffy API key, when it is not in GENIFFY_API_KEY. Keep it on your server. */

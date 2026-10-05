@@ -9,4 +9,5 @@ The first release.
   asked once per question, and only the final answer is saved.
 - `geniffyMiddleware(options)`: the same, for `wrapLanguageModel`.
 - `geniffyTools({ space })`: `recall` and `remember`, for a model that decides when to look things up.
-- A space is required, so one user's memory is never written to another's.
+- A space is required, and a blank or undefined one throws, so one user's memory is never written to another's
+  or to your own.
