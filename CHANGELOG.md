@@ -11,3 +11,4 @@ The first release.
 - `geniffyTools({ space })`: `recall` and `remember`, for a model that decides when to look things up.
 - A space is required, and a blank or undefined one throws, so one user's memory is never written to another's
   or to your own.
+- Built on geniffy 0.2.0, so each call is named in the Geniffy app's Requests page.
