@@ -1,6 +1,6 @@
 {
   "name": "geniffy-ai-sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Geniffy for the Vercel AI SDK: a memory of each of your users, for any model. Wrap a model, or give it recall and remember tools.",
   "license": "MIT",
   "type": "module",
@@ -38,7 +38,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "geniffy": "^0.2.0"
+    "geniffy": "^0.4.0"
   },
   "peerDependencies": {
     "ai": ">=7"

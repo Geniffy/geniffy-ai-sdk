@@ -4,9 +4,10 @@
 
 # Geniffy for the Vercel AI SDK
 
-Give your AI SDK app a memory of each of your users, for any model the AI SDK supports. Wrap the model, and it
-is told what is known about the user before every reply, each line with where it came from, and each exchange is
-saved after. When nothing is known, the model is told so, and says so instead of guessing.
+Give your AI SDK app a memory of each of your users, for any model the AI SDK supports. Wrap the model, and before
+every reply it gets the user's briefing: where things stand, what is due, the rules that apply, what happened, and
+what is known that bears on their message. After the reply, the run is saved, tool calls included, into one memory
+for the whole conversation. When nothing is known, the model is told so, and says so instead of guessing.
 
 [![CI](https://github.com/Geniffy/geniffy-ai-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/Geniffy/geniffy-ai-sdk/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/geniffy-ai-sdk)](https://www.npmjs.com/package/geniffy-ai-sdk)
@@ -26,26 +27,33 @@ import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { withGeniffy } from "geniffy-ai-sdk";
 
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json();
+  const { id, messages }: { id: string; messages: UIMessage[] } = await req.json();
   const user = await signedInUser(req);               // your own sign-in, never the request body
 
   const result = streamText({
-    model: withGeniffy(anthropic("claude-opus-5-5"), { space: `user_${user.id}` }),
+    model: withGeniffy(anthropic("claude-opus-5-5"), { space: `user_${user.id}`, session: id }),
     messages: await convertToModelMessages(messages),
   });
   return result.toUIMessageStreamResponse();
 }
 ```
 
-- **Before each reply**, Geniffy is asked what is known that bears on the user's last message, and the answer goes
-  in a system message after your own instructions.
-- **After the final answer**, the exchange is saved to that user's space. The stream closes only once it is saved,
-  so a serverless function never ends halfway through. A step that only calls tools is not saved.
+- **Before each reply**, the user's briefing goes in a system message after your own instructions: where things
+  stand, what is due or was promised, the rules that apply, what happened, then what is known that bears on their
+  last message, each line dated. In a run with tools, Geniffy is asked once, not once per step.
+- **After the final answer**, the run is saved to that user's space: what they said, each tool the model called and
+  what it returned, and the answer. `session` is the conversation (the chat's id), and a conversation is one memory
+  however long it gets: the history your app sends with every request is not saved again. Without `session`, each
+  run is a memory of its own. The stream closes only once the run is saved, so a serverless function never ends
+  halfway through.
 - **If Geniffy can't be reached**, the reply goes on without memory, and `onError` hears about it.
 
-Options: `remember: false` to only read, `instructions` to change what the model is told about the memory,
-`client` or `apiKey` to bring your own Geniffy client, and `onError`. `geniffyMiddleware(options)` is the same,
-for `wrapLanguageModel` alongside other middleware.
+Options: `project` keeps the briefing to one project and labels what is saved with it; `briefing: false` reads only
+what bears on the user's last message; `budgetChars` is the most the briefing adds (6,000 characters unless you
+say); `remember: false` only reads; `instructions` changes what the model is told about the memory; `client` or
+`apiKey` brings your own Geniffy client; and `onError`. An account without the briefing switched on is given what
+bears on the last message instead, and the briefing is tried again ten minutes later. `geniffyMiddleware(options)` is
+the same, for `wrapLanguageModel` alongside other middleware.
 
 ## Or give the model tools
 
@@ -72,7 +80,8 @@ deletes their account, forget them with `new Geniffy().forgetSpace(...)` from th
 ## Develop
 
 ```bash
-npm test          # through the AI SDK's own generateText and streamText, with its mock model
+npm test          # through the AI SDK's own generateText and streamText, with its mock model, and the real
+                  # geniffy client against a stand-in for the API
 npm run check     # the type declarations against the AI SDK's types
 ```
 
